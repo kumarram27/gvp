@@ -4,9 +4,9 @@ MyGVP is a Command Line Interface (CLI) tool designed to simplify the process of
 
 ## Features
 
-- Fetch results URLs based on batch year and semester.
 - Directly retrieve results by providing the registration number.
 - Simple and intuitive CLI interface.
+- Fetch results URLs based on batch year and semester.
 
 ## Installation
 
@@ -18,13 +18,13 @@ npm install -g mygvp
 
 ## Usage
 
-### Fetch Results URL
+### Fetch Results
 
-To fetch results URL for a specific batch year and semester, use the following command:
+To fetch results URL and result directly , use the following command:
 ```bash
-mygvp <batch_year>
+mygvp <registration_number>
 ```
-Replace `<batch_year>` with the desired batch year (e.g., `2021`).
+Replace `<registration_number>` with your registration_number.
 ## Contributing
 
 Contributions are welcome! Feel free to submit bug reports, feature requests, or pull requests.
