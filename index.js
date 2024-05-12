@@ -7,6 +7,7 @@ const urls = require("./links");
 const inquirerPromise = import("inquirer");
 const url = require("url");
 const { get } = require("http");
+const { exec } = require("child_process");
 
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
@@ -105,10 +106,7 @@ function parseResult(html, rollNoLength) {
 }
 
 async function displayResultTable(result) {
-  // Dynamically import chalk
   const chalk = (await import("chalk")).default;
-
-  // Print student's name and roll number
   console.log(`Name: ${chalk.blue(result.name)}`);
 
   const table = new Table({
@@ -153,12 +151,11 @@ async function getResult(registrationNumber) {
 
   // Select semester
   semester = await selectSemester(batchYear);
-  const chalk = (await import("chalk")).default;
   // Fetch result URL
   const url = urls[batchYear] && urls[batchYear][semester];
   const { default: isOnline } = await import("is-online");
   const online = await isOnline();
-
+  const chalk = (await import("chalk")).default;
   if (!online) {
     console.log("Device is offline. Unable to fetch results.");
     console.log(`URL for ${semester} results: ${chalk.blue(url)}\n\n`);
@@ -201,7 +198,19 @@ async function getResult(registrationNumber) {
     console.log("URL not found for the selected semester.");
   }
 }
-
+async function displayImage(imagePath) {
+  exec(`start ${imagePath}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return;
+    }
+    console.log(`Opened ${imagePath} in default image viewer`);
+  });
+}
 // CLI command for directly fetching results based on registration number
 program
   .argument("<registration_number>")
@@ -209,23 +218,19 @@ program
   .description("Fetch results directly based on registration number")
   .action(async (registrationNumber, options) => {
     try {
+      const chalk = (await import("chalk")).default;
       if (registrationNumber === "21131a0527") {
         if (options.Admin) {
-          console.log(
-            "Fetching results with admin privileges for registration number:",
-            registrationNumber
-          );
+          console.log( "Fetching results with admin privileges for registration number:", chalk.green(registrationNumber));
           await getResult(registrationNumber);
           return;
         } else {
-          console.log("Custom message for registration number 21131a0527.");
+          const imagePath = "image.jpeg";
+          await displayImage(imagePath);
           return;
         }
       }
-      console.log(
-        "Fetching results for registration number:",
-        registrationNumber
-      );
+      console.log("Fetching results for registration number:",  chalk.green(registrationNumber));
       await getResult(registrationNumber);
     } catch (error) {
       console.error("Error:", error.message, error.response?.data);
