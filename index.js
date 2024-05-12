@@ -157,11 +157,11 @@ async function getResult(registrationNumber) {
   const chalk = (await import("chalk")).default;
   if (!online) {
     console.log("Device is offline. Unable to fetch results.");
-    console.log(`URL for ${semester} results: ${chalk.blue(url)}\n\n`);
+    console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
     return;
   }
   if(batchYear === "2020" && semester === "Sem 1" || semester === "Sem 2"){
-    console.log(`URL for ${semester} results: ${chalk.blue(url)}\n\n`);
+    console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
     return;
   }
   // Adjust the payload and the endpoint for the POST request
