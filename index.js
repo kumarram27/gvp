@@ -6,7 +6,6 @@ const Table = require("cli-table3");
 const urls = require("./links");
 const inquirerPromise = import("inquirer");
 const url = require("url");
-const { get } = require("http");
 
 
 // Function to fetch semester options based on batch year
