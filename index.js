@@ -161,6 +161,10 @@ async function getResult(registrationNumber) {
     console.log(`URL for ${semester} results: ${chalk.blue(url)}\n\n`);
     return;
   }
+  if(batchYear === "2020" && semester === "Sem 1" || semester === "Sem 2"){
+    console.log(`URL for ${semester} results: ${chalk.blue(url)}\n\n`);
+    return;
+  }
   // Adjust the payload and the endpoint for the POST request
   const urlString = url;
   const parsedUrl = new URL(urlString);
@@ -198,19 +202,7 @@ async function getResult(registrationNumber) {
     console.log("URL not found for the selected semester.");
   }
 }
-async function displayImage(imagePath) {
-  exec(`start ${imagePath}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
-    }
-    console.log(`Opened ${imagePath} in default image viewer`);
-  });
-}
+
 // CLI command for directly fetching results based on registration number
 program
   .argument("<registration_number>")
