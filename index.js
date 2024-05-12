@@ -7,7 +7,7 @@ const urls = require("./links");
 const inquirerPromise = import("inquirer");
 const url = require("url");
 const { get } = require("http");
-const { exec } = require("child_process");
+
 
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
@@ -225,8 +225,7 @@ program
           await getResult(registrationNumber);
           return;
         } else {
-          const imagePath = "image.jpeg";
-          await displayImage(imagePath);
+          console.log(chalk.red("Naa Saavu Nenu Sastha Neekenduku"));
           return;
         }
       }

@@ -1,6 +1,10 @@
 {
   "name": "mygvp",
+<<<<<<< HEAD
   "version": "1.2.1",
+=======
+  "version": "1.1.1",
+>>>>>>> parent of 2fc4b3a (1.2.0)
   "description": "CLI tool for accessing student results from GVP College of Engineering. Simplifies the process of accessing student academic data from the college's result portal.",
   "main": "index.js",
   "directories": {
