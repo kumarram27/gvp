@@ -41,13 +41,13 @@ async function selectSemester(batchYear) {
 function extractBatchYear(registrationNumber) {
   let batchYear = "";
   // Extracting batch year using regular expressions
-  if (/^21/.test(registrationNumber)) {
-    batchYear = "2021";
-  } else if (/^20/.test(registrationNumber)) {
+  if ((/^20/.test(registrationNumber)&& registrationNumber.length === 10) || registrationNumber == 2020){
     batchYear = "2020";
-  } else if (/^322/.test(registrationNumber)) {
+  } else if ((/^21/.test(registrationNumber)&& registrationNumber.length === 10) || registrationNumber == 2021) {
+    batchYear = "2021";
+  } else if ((/^322/.test(registrationNumber)&& registrationNumber.length === 12) || registrationNumber == 2022) {
     batchYear = "2022";
-  } else if (/^323/.test(registrationNumber)) {
+  } else if ( (/^323/.test(registrationNumber) && registrationNumber.length === 12) || registrationNumber == 2023) {
     batchYear = "2023";
   }
   return batchYear;
@@ -144,8 +144,7 @@ async function displayResultTable(result) {
 
 
 async function getResult(registrationNumber) {
-  const rollNoLength = registrationNumber.length; // Define rollNoLength here
-  // Extract batch year from registration number using regex
+  const rollNoLength = registrationNumber.length;
   const batchYear = extractBatchYear(registrationNumber);
 
   // Select semester
@@ -160,7 +159,11 @@ async function getResult(registrationNumber) {
     console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
     return;
   }
-  if(batchYear === "2020" && semester === "Sem 1" || semester === "Sem 2"){
+  if (rollNoLength === 4) {
+    console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
+    return;
+  }
+  if(batchYear === "2020" && (semester === "Sem 1" || semester === "Sem 2")){
     console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
     return;
   }
@@ -210,7 +213,7 @@ program
   .action(async (registrationNumber, options) => {
     try {
       const chalk = (await import("chalk")).default;
-      if (registrationNumber === "21131a0527") {
+      if (registrationNumber === "21131a0527" || registrationNumber ==="21131A0527"){
         if (options.Admin) {
           console.log( "Fetching results with admin privileges for registration number:", chalk.green(registrationNumber));
           await getResult(registrationNumber);
