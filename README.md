@@ -25,6 +25,13 @@ To fetch results URL and result directly , use the following command:
 mygvp <registration_number>
 ```
 Replace `<registration_number>` with your registration_number.
+
+Or you can enter your batch year:
+```bash
+mygvp <batch_year>
+```
+Replace `<batch_year>` with your batch_year.
+
 ## Contributing
 
 Contributions are welcome! Feel free to submit bug reports, feature requests, or pull requests.

@@ -7,12 +7,20 @@ const urls = require("./links");
 const inquirerPromise = import("inquirer");
 const url = require("url");
 
-
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
   const inquirer = await inquirerPromise;
   const semesterOptions = {
-    2020: ["Sem 1","Sem 2", "Sem 3", "Sem 4", "Sem 5", "Sem 6","Sem 7","Sem 8" ],
+    2020: [
+      "Sem 1",
+      "Sem 2",
+      "Sem 3",
+      "Sem 4",
+      "Sem 5",
+      "Sem 6",
+      "Sem 7",
+      "Sem 8",
+    ],
     2021: ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5", "Sem 6"],
     2022: ["Sem 1", "Sem 2", "Sem 3"],
     2023: ["Sem 1"],
@@ -41,13 +49,25 @@ async function selectSemester(batchYear) {
 function extractBatchYear(registrationNumber) {
   let batchYear = "";
   // Extracting batch year using regular expressions
-  if ((/^20/.test(registrationNumber)&& registrationNumber.length === 10) || registrationNumber == 2020){
+  if (
+    (/^20/.test(registrationNumber) && registrationNumber.length === 10) ||
+    registrationNumber == 2020
+  ) {
     batchYear = "2020";
-  } else if ((/^21/.test(registrationNumber)&& registrationNumber.length === 10) || registrationNumber == 2021) {
+  } else if (
+    (/^21/.test(registrationNumber) && registrationNumber.length === 10) ||
+    registrationNumber == 2021
+  ) {
     batchYear = "2021";
-  } else if ((/^322/.test(registrationNumber)&& registrationNumber.length === 12) || registrationNumber == 2022) {
+  } else if (
+    (/^322/.test(registrationNumber) && registrationNumber.length === 12) ||
+    registrationNumber == 2022
+  ) {
     batchYear = "2022";
-  } else if ( (/^323/.test(registrationNumber) && registrationNumber.length === 12) || registrationNumber == 2023) {
+  } else if (
+    (/^323/.test(registrationNumber) && registrationNumber.length === 12) ||
+    registrationNumber == 2023
+  ) {
     batchYear = "2023";
   }
   return batchYear;
@@ -118,14 +138,17 @@ async function displayResultTable(result) {
   });
 
   result.subjects.forEach((subject) => {
-    if (subject.performanceGrade === "F" || subject.performanceGrade === "Fail") {
+    if (
+      subject.performanceGrade === "F" ||
+      subject.performanceGrade === "Fail"
+    ) {
       table.push([
         chalk.red(subject.subjectCodeAndName),
         chalk.red(subject.attendanceGrade),
         chalk.red(subject.performanceGrade),
         chalk.red(subject.credits),
       ]);
-    }else {
+    } else {
       table.push([
         chalk.green(subject.subjectCodeAndName),
         chalk.green(subject.attendanceGrade),
@@ -133,15 +156,12 @@ async function displayResultTable(result) {
         chalk.green(subject.credits),
       ]);
     }
-    
   });
 
   console.log(`SGPA: ${chalk.cyan(result.sgpa)}`);
   // Print table for subjects
   console.log(table.toString());
 }
-
-
 
 async function getResult(registrationNumber) {
   const rollNoLength = registrationNumber.length;
@@ -163,21 +183,20 @@ async function getResult(registrationNumber) {
     console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
     return;
   }
-  if(batchYear === "2020" && (semester === "Sem 1" || semester === "Sem 2")){
+  if (batchYear === "2020" && (semester === "Sem 1" || semester === "Sem 2")) {
     console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
     return;
   }
   // Adjust the payload and the endpoint for the POST request
   const urlString = url;
   const parsedUrl = new URL(urlString);
-  
+
   const semname = parsedUrl.searchParams.get("semname");
   const regulation = parsedUrl.searchParams.get("regulation");
   // const lastdaterev = parsedUrl.searchParams.get("lastdaterev");
   const semesterNo = parsedUrl.searchParams.get("semester");
 
-  
-  console.log("\t",chalk.red(semname));
+  console.log("\t", chalk.red(semname));
   // console.log("Regulation:", regulation);
   // console.log("Semester:", semesterNo);
   // console.log("Last date for Revaluation:", lastdaterev);
@@ -205,6 +224,30 @@ async function getResult(registrationNumber) {
   }
 }
 
+// Command to display information about mygvp
+program
+  .command("info")
+  .description("Display information about the mygvp project")
+  .action(() => {
+    console.log(`
+      🌟 Welcome to mygvp! 🚀
+
+      This project helps you fetch and display your semester results in a colorful and efficient way. 
+            
+      Usage:
+      command : mygvp <registration_number> 
+      - To fetch your results, simply replace <registration_number> with your registration number.
+
+      command : mygvp <batch_year>
+      - You can also enter your batch year 
+      (if you want to get result URLs even if you are online or if you are a lateral entry student)
+      
+      - For specific features, follow the prompts.
+
+      Enjoy using mygvp! 🎉
+    `);
+  });
+
 // CLI command for directly fetching results based on registration number
 program
   .argument("<registration_number>")
@@ -212,10 +255,31 @@ program
   .description("Fetch results directly based on registration number")
   .action(async (registrationNumber, options) => {
     try {
+      if (
+        registrationNumber.length !== 10 &&
+        registrationNumber.length !== 12 &&
+        registrationNumber.length >= 5
+      ) {
+        console.error(
+          "Invalid registration number. Please enter a valid registration number."
+        );
+        return;
+      }
+      if (registrationNumber.length === 4) {
+        console.log("Fetching results for the batch:", registrationNumber);
+        await getResult(registrationNumber);
+        return;
+      }
       const chalk = (await import("chalk")).default;
-      if (registrationNumber === "21131a0527" || registrationNumber ==="21131A0527"){
+      if (
+        registrationNumber === "21131a0527" ||
+        registrationNumber === "21131A0527"
+      ) {
         if (options.Admin) {
-          console.log( "Fetching results with admin privileges for registration number:", chalk.green(registrationNumber));
+          console.log(
+            "Fetching results with admin privileges for registration number:",
+            chalk.green(registrationNumber)
+          );
           await getResult(registrationNumber);
           return;
         } else {
@@ -223,7 +287,10 @@ program
           return;
         }
       }
-      console.log("Fetching results for registration number:",  chalk.green(registrationNumber));
+      console.log(
+        "Fetching results for registration number:",
+        chalk.green(registrationNumber)
+      );
       await getResult(registrationNumber);
     } catch (error) {
       console.error("Error:", error.message, error.response?.data);
