@@ -334,7 +334,7 @@ program
       ) {
         if (options.Admin) {
           admin = await getName(registrationNumber);
-          console.log(`Hi, Admin ${chalk.green(admin)}!`);
+          console.log(`Hi, ${chalk.red("Admin")} ${chalk.green(admin)}!`);
           await getResult(registrationNumber);
           return;
         } else {
