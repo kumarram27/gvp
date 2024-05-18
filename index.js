@@ -87,24 +87,29 @@ async function fetchResultData(url, payload) {
 // Function to parse HTML response and extract result
 function parseResult(html, rollNoLength) {
   const $ = cheerio.load(html);
+
+  // Extracting the title
+  const title = $("p[align='center'] font[size='4']").text().trim();
+
   // Extracting name
   let name = "";
-  const Name = $("td[colspan='3']").text().trim();
+  let Name = $("td[colspan='3']").text().trim();
+  if (Name === "") {
+    Name = $("td[colspan='4']").text().trim();
+  }
   if (rollNoLength == 10) {
     name = Name.slice(10)
       .replace(/\d+\.\d+$/, "")
-      .trim(); // Remove SGPA from name
+      .trim();
   } else if (rollNoLength == 12) {
     name = Name.slice(12)
       .replace(/\d+\.\d+$/, "")
-      .trim(); // Remove SGPA from name
+      .trim();
   }
-
-  // Extracting subjects
   const subjects = [];
-  $("table[border='1'] tr:gt(2)").each((index, element) => {
+  $("table[border='1'] tr").each((index, element) => {
     const $tds = $(element).find("td");
-    if ($tds.length === 4) {
+    if ($tds.length === 4 && $tds.eq(0).text().trim() !== "") {
       const subjectCodeAndName = $tds.eq(0).text().trim();
       const attendanceGrade = $tds.eq(1).text().trim();
       const performanceGrade = $tds.eq(2).text().trim();
@@ -119,13 +124,18 @@ function parseResult(html, rollNoLength) {
   });
 
   // Extracting SGPA
-  const sgpa = $("th:contains('SGPA')").next().text().trim();
+  let sgpa = $("th:contains('SGPA')").next().text().trim();
+  if (sgpa === "") {
+    sgpa = $("td:contains('SGPA')").next().text().trim();
+  }
 
-  return { name, subjects, sgpa };
+  return { title, name, subjects, sgpa };
 }
 
 async function displayResultTable(result) {
   const chalk = (await import("chalk")).default;
+  console.log("\t", chalk.red(result.title));
+
   console.log(`Name: ${chalk.blue(result.name)}`);
 
   const table = new Table({
@@ -174,56 +184,73 @@ async function getResult(registrationNumber) {
   const { default: isOnline } = await import("is-online");
   const online = await isOnline();
   const chalk = (await import("chalk")).default;
-  if (!online) {
-    console.log("Device is offline. Unable to fetch results.");
-    console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
-    return;
-  }
-  if (rollNoLength === 4) {
-    console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
-    return;
-  }
-  if (batchYear === "2020" && (semester === "Sem 1" || semester === "Sem 2")) {
-    console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
-    return;
-  }
-  // Adjust the payload and the endpoint for the POST request
-  const urlString = url;
-  const parsedUrl = new URL(urlString);
-
-  const semname = parsedUrl.searchParams.get("semname");
-  const regulation = parsedUrl.searchParams.get("regulation");
-  // const lastdaterev = parsedUrl.searchParams.get("lastdaterev");
-  const semesterNo = parsedUrl.searchParams.get("semester");
-
-  console.log("\t", chalk.red(semname));
-  // console.log("Regulation:", regulation);
-  // console.log("Semester:", semesterNo);
-  // console.log("Last date for Revaluation:", lastdaterev);
-
-  const payload = {
-    input1: registrationNumber,
-    // u_field: "Regd.No.",
-    hidedata: semname,
-    // hidedata1: "03-05-2023",
-    hidedata2: regulation,
-    hidedata3: semesterNo,
-  };
-
-  const payloadString = new URLSearchParams(payload).toString();
-
-  const endpoint = "http://gvpce.ac.in:10000/GVP%20Results/RegularResults";
-
-  // Fetch result data
   if (url) {
-    const resultData = await fetchResultData(endpoint, payloadString);
-    const result = parseResult(resultData, rollNoLength); // Pass rollNoLength to parseResult
-    displayResultTable(result);
-  } else {
-    console.log("URL not found for the selected semester.");
+    if (!online) {
+      console.log("Device is offline. Unable to fetch results.");
+      console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
+      return;
+    }
+    if (rollNoLength === 4) {
+      console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
+      return;
+    }
+
+    // Adjust the payload and the endpoint for the POST request
+    const urlString = url;
+    const parsedUrl = new URL(urlString);
+    const semname = parsedUrl.searchParams.get("semname");
+    const regulation = parsedUrl.searchParams.get("regulation");
+    // const lastdaterev = parsedUrl.searchParams.get("lastdaterev");
+    const semesterNo = parsedUrl.searchParams.get("semester");
+
+    // console.log("\t", chalk.red(semname));
+    // console.log("Regulation:", regulation);
+    // console.log("Semester:", semesterNo);
+    // console.log("Last date for Revaluation:", lastdaterev);
+
+    let endpoint;
+    let payload;
+
+    function constructEndpoint(url) {
+      return url.replace("btechsearch.asp", "find_info.asp");
+    }
+
+    if (batchYear === "2021" && semester === "Sem 6") {
+      endpoint = constructEndpoint(urlString);
+      payload = {
+        u_input: registrationNumber,
+        u_field: "state",
+      };
+    } else if (
+      batchYear === "2020" &&
+      (semester === "Sem 1" || semester === "Sem 2")
+    ) {
+      endpoint = constructEndpoint(urlString);
+      payload = {
+        u_input: registrationNumber,
+        u_field: "state",
+      };
+    } else {
+      endpoint = "http://gvpce.ac.in:10000/GVP%20Results/RegularResults";
+      payload = {
+        input1: registrationNumber,
+        hidedata: semname,
+        hidedata2: regulation,
+        hidedata3: semesterNo,
+      };
+    }
+
+    let payloadString = new URLSearchParams(payload).toString();
+
+    try {
+      const resultData = await fetchResultData(endpoint, payloadString);
+      const result = parseResult(resultData, rollNoLength);
+      displayResultTable(result);
+    } catch (error) {
+      console.error("Error fetching or displaying results:", error);
+    }
   }
 }
-
 // Command to display information about mygvp
 program
   .command("info")
