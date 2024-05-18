@@ -18,6 +18,14 @@ npm install -g mygvp
 
 ## Usage
 
+### About
+
+To  Display information about the mygvp project
+```bash
+mygvp info
+```
+
+
 ### Fetch Results
 
 To fetch results URL and result directly , use the following command:
