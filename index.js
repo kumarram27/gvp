@@ -87,11 +87,7 @@ async function fetchResultData(url, payload) {
 // Function to parse HTML response and extract result
 function parseResult(html, rollNoLength) {
   const $ = cheerio.load(html);
-
-  // Extracting the title
   const title = $("p[align='center'] font[size='4']").text().trim();
-
-  // Extracting name
   let name = "";
   let Name = $("td[colspan='3']").text().trim();
   if (Name === "") {
@@ -135,7 +131,6 @@ function parseResult(html, rollNoLength) {
 async function displayResultTable(result) {
   const chalk = (await import("chalk")).default;
   console.log("\t", chalk.red(result.title));
-
   console.log(`Name: ${chalk.blue(result.name)}`);
 
   const table = new Table({
@@ -146,77 +141,111 @@ async function displayResultTable(result) {
       chalk.yellow("Credits"),
     ],
   });
-
   result.subjects.forEach((subject) => {
     if (
-      subject.performanceGrade === "F" ||
-      subject.performanceGrade === "Fail"
-    ) {
-      table.push([
-        chalk.red(subject.subjectCodeAndName),
-        chalk.red(subject.attendanceGrade),
-        chalk.red(subject.performanceGrade),
-        chalk.red(subject.credits),
-      ]);
-    } else {
-      table.push([
-        chalk.green(subject.subjectCodeAndName),
-        chalk.green(subject.attendanceGrade),
-        chalk.green(subject.performanceGrade),
-        chalk.green(subject.credits),
-      ]);
-    }
+        subject.performanceGrade === "F" ||
+        subject.performanceGrade === "Fail"
+      ) {
+        table.push([
+          chalk.red(subject.subjectCodeAndName),
+          chalk.red(subject.attendanceGrade),
+          chalk.red(subject.performanceGrade),
+          chalk.red(subject.credits),
+        ]);
+      } else {
+        table.push([
+          chalk.green(subject.subjectCodeAndName),
+          chalk.green(subject.attendanceGrade),
+          chalk.green(subject.performanceGrade),
+          chalk.green(subject.credits),
+        ]);
+      }
   });
-
   console.log(`SGPA: ${chalk.cyan(result.sgpa)}`);
-  // Print table for subjects
   console.log(table.toString());
+}
+async function getName(registrationNumber) {
+  const rollNoLength = registrationNumber.length;
+  const batchYear = extractBatchYear(registrationNumber);
+
+  if (!batchYear) {
+    console.error("Invalid registration number.");
+    return;
+  }
+
+  const url = urls[batchYear] && urls[batchYear]["Sem 1"]; // Assuming we always take the first semester's URL
+  const result = await getResults(
+    registrationNumber,
+    url,
+    "Sem 1",
+    rollNoLength,
+    batchYear
+  );
+
+  if (result && result.name) {
+    return result.name;
+  } else {
+    return null;
+  }
 }
 
 async function getResult(registrationNumber) {
   const rollNoLength = registrationNumber.length;
   const batchYear = extractBatchYear(registrationNumber);
-
-  // Select semester
-  semester = await selectSemester(batchYear);
-  // Fetch result URL
+  const semester = await selectSemester(batchYear);
   const url = urls[batchYear] && urls[batchYear][semester];
+  const result = await getResults(
+    registrationNumber,
+    url,
+    semester,
+    rollNoLength,
+    batchYear
+  );
+
+  if (result) {
+    displayResultTable(result);
+  } else {
+    return null;
+  }
+}
+
+async function getResults(
+  registrationNumber,
+  url,
+  semester,
+  rollNoLength,
+  batchYear
+) {
   const { default: isOnline } = await import("is-online");
   const online = await isOnline();
   const chalk = (await import("chalk")).default;
+
   if (url) {
     if (!online) {
       console.log("Device is offline. Unable to fetch results.");
       console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
-      return;
+      return null;
     }
+
     if (rollNoLength === 4) {
       console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
-      return;
+      return null;
     }
 
-    // Adjust the payload and the endpoint for the POST request
-    const urlString = url;
-    const parsedUrl = new URL(urlString);
+    const parsedUrl = new URL(url);
     const semname = parsedUrl.searchParams.get("semname");
     const regulation = parsedUrl.searchParams.get("regulation");
-    // const lastdaterev = parsedUrl.searchParams.get("lastdaterev");
     const semesterNo = parsedUrl.searchParams.get("semester");
 
-    // console.log("\t", chalk.red(semname));
-    // console.log("Regulation:", regulation);
-    // console.log("Semester:", semesterNo);
-    // console.log("Last date for Revaluation:", lastdaterev);
+    const constructEndpoint = (url) => {
+      return url.replace("btechsearch.asp", "find_info.asp");
+    };
 
     let endpoint;
     let payload;
 
-    function constructEndpoint(url) {
-      return url.replace("btechsearch.asp", "find_info.asp");
-    }
-
     if (batchYear === "2021" && semester === "Sem 6") {
-      endpoint = constructEndpoint(urlString);
+      endpoint = constructEndpoint(url);
       payload = {
         u_input: registrationNumber,
         u_field: "state",
@@ -225,7 +254,7 @@ async function getResult(registrationNumber) {
       batchYear === "2020" &&
       (semester === "Sem 1" || semester === "Sem 2")
     ) {
-      endpoint = constructEndpoint(urlString);
+      endpoint = constructEndpoint(url);
       payload = {
         u_input: registrationNumber,
         u_field: "state",
@@ -240,14 +269,15 @@ async function getResult(registrationNumber) {
       };
     }
 
-    let payloadString = new URLSearchParams(payload).toString();
+    const payloadString = new URLSearchParams(payload).toString();
 
     try {
       const resultData = await fetchResultData(endpoint, payloadString);
       const result = parseResult(resultData, rollNoLength);
-      displayResultTable(result);
+      return result;
     } catch (error) {
       console.error("Error fetching or displaying results:", error);
+      return null;
     }
   }
 }
@@ -303,21 +333,17 @@ program
         registrationNumber === "21131A0527"
       ) {
         if (options.Admin) {
-          console.log(
-            "Fetching results with admin privileges for registration number:",
-            chalk.green(registrationNumber)
-          );
+          admin = await getName(registrationNumber);
+          console.log(`Hi, Admin ${chalk.green(admin)}!`);
           await getResult(registrationNumber);
           return;
         } else {
-          console.log(chalk.red("Naa Saavu Nenu Sastha Neekenduku"));
+          console.log(chalk.red("Access denied. Admin privileges required."));
           return;
         }
       }
-      console.log(
-        "Fetching results for registration number:",
-        chalk.green(registrationNumber)
-      );
+      user = await getName(registrationNumber);
+      console.log(`Hi, ${chalk.green(user)}!`);
       await getResult(registrationNumber);
     } catch (error) {
       console.error("Error:", error.message, error.response?.data);
