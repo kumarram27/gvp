@@ -135,7 +135,7 @@ async function displayResultTable(result) {
 
   const table = new Table({
     head: [
-      chalk.yellow("Subject"),
+      chalk.yellow("Subject Code & Name"),
       chalk.yellow("Attendance Grade"),
       chalk.yellow("Performance Grade"),
       chalk.yellow("Credits"),
@@ -244,21 +244,22 @@ async function getResults(
     let endpoint;
     let payload;
 
-    if (batchYear === "2021" && semester === "Sem 6") {
-      endpoint = constructEndpoint(url);
-      payload = {
-        u_input: registrationNumber,
-        u_field: "state",
-      };
-    } else if (
-      batchYear === "2020" &&
-      (semester === "Sem 1" || semester === "Sem 2")
+    if (
+      // batchYear === "2020" && (semester === "Sem 1" || semester === "Sem 2")
+      url.includes("btechsearch.asp")
     ) {
       endpoint = constructEndpoint(url);
       payload = {
         u_input: registrationNumber,
         u_field: "state",
       };
+    // } else if (batchYear === "2021" && semester === "Sem 1")
+    //  {
+    //   endpoint = constructEndpoint(url);
+    //   payload = {
+    //     u_input: registrationNumber,
+    //     u_field: "state",
+    //   };
     } else {
       endpoint = "http://gvpce.ac.in:10000/GVP%20Results/RegularResults";
       payload = {
@@ -346,7 +347,8 @@ program
       console.log(`Hi, ${chalk.green(user)}!`);
       await getResult(registrationNumber);
     } catch (error) {
-      console.error("Error:", error.message, error.response?.data);
+      // console.error("Error:", error.message, error.response?.data);
+      console.log("Error:", error.message);
     }
   });
 
