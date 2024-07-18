@@ -5,22 +5,13 @@ const cheerio = require("cheerio");
 const Table = require("cli-table3");
 const urls = require("./links");
 const inquirerPromise = import("inquirer");
-const url = require("url");
+
 
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
   const inquirer = await inquirerPromise;
   const semesterOptions = {
-    2020: [
-      "Sem 1",
-      "Sem 2",
-      "Sem 3",
-      "Sem 4",
-      "Sem 5",
-      "Sem 6",
-      "Sem 7",
-      "Sem 8",
-    ],
+    2020: ["Sem 1","Sem 2","Sem 3","Sem 4","Sem 5","Sem 6","Sem 7","Sem 8"],
     2021: ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5", "Sem 6"],
     2022: ["Sem 1", "Sem 2", "Sem 3"],
     2023: ["Sem 1"],
@@ -105,7 +96,7 @@ function parseResult(html, rollNoLength) {
   const subjects = [];
   $("table[border='1'] tr").each((index, element) => {
     const $tds = $(element).find("td");
-    if ($tds.length === 4 && $tds.eq(0).text().trim() !== "") {
+    if ($tds.length === 4 && $tds.eq(0).text().trim() !== "" && $tds.eq(0).text().trim() !== "Subject Code & Name"){
       const subjectCodeAndName = $tds.eq(0).text().trim();
       const attendanceGrade = $tds.eq(1).text().trim();
       const performanceGrade = $tds.eq(2).text().trim();
@@ -165,27 +156,31 @@ async function displayResultTable(result) {
   console.log(table.toString());
 }
 async function getName(registrationNumber) {
-  const rollNoLength = registrationNumber.length;
-  const batchYear = extractBatchYear(registrationNumber);
-
-  if (!batchYear) {
-    console.error("Invalid registration number.");
-    return;
-  }
-
-  const url = urls[batchYear] && urls[batchYear]["Sem 1"]; // Assuming we always take the first semester's URL
-  const result = await getResults(
-    registrationNumber,
-    url,
-    "Sem 1",
-    rollNoLength,
-    batchYear
-  );
-
-  if (result && result.name) {
-    return result.name;
-  } else {
-    return null;
+  const { default: isOnline } = await import("is-online");
+  const online = await isOnline();
+  if(online){
+    const rollNoLength = registrationNumber.length;
+    const batchYear = extractBatchYear(registrationNumber);
+    if (!batchYear) {
+      console.error("Invalid registration number.");
+      return;
+    }
+    const url = urls[batchYear] && urls[batchYear]["Sem 1"]; // Assuming we always take the first semester's URL
+    const result = await getResults(
+      registrationNumber,
+      url,
+      "Sem 1",
+      rollNoLength,
+      batchYear
+    );
+    if (result && result.name) {
+      return result.name;
+    } else {
+      return null;
+    }
+  }else {
+    console.log("Device is offline")
+    return `user ${registrationNumber}`;
   }
 }
 
@@ -222,7 +217,7 @@ async function getResults(
 
   if (url) {
     if (!online) {
-      console.log("Device is offline. Unable to fetch results.");
+      console.error("Device is offline. Unable to fetch results.");
       console.log(`URL for ${semester} results: "${chalk.blue(url)}"\n`);
       return null;
     }

@@ -40,6 +40,8 @@ const urls = {
       "http://gvpce.ac.in:10000/GVP%20Results/RegularResults.jsp?semname=B.%20Tech.%20II%20Semester%20(R-2022)%20(For%202022%20Admitted%20Batches)%20Regular%20Examination%20Results,%20August%202023&regulation=R-2022&semester=2&lastdaterev=18-11-2023",
     "Sem 3":
       "http://gvpce.ac.in:10000/GVP%20Results/RegularResults.jsp?semname=B.%20Tech.%20III%20Semester%20(R-2022)%20(For%202022%20Admitted%20Batches)%20Regular%20Examination%20Results,%20DECEMBER%202023&regulation=R-2022&semester=3&lastdaterev=12-03-2024",
+    "Sem 4":
+      "http://gvpce.ac.in:10000/GVP%20Results/RegularResults.jsp?semname=B.%20Tech.%20IV%20Semester%20(R-2022)%20(For%202022%20Admitted%20Batch)%20Regular%20Examinations%20Results,April-2024&regulation=R-2022&semester=4&lastdaterev=01-07-2024",
   },
   2023: {
     "Sem 1":
