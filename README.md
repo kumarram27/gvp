@@ -34,12 +34,12 @@ mygvp <registration_number>
 ```
 Replace `<registration_number>` with your registration_number.
 
-Or you can enter your batch year:
+Or you can enter your batch year also:
 ```bash
-mygvp <batch_year>
+mygvp <registration_number> <batch_year>
 ```
 Replace `<batch_year>` with your batch_year.
-
+This works for lateral entries and other special cases.
 ## Contributing
 
 Contributions are welcome! Feel free to submit bug reports, feature requests, or pull requests.
