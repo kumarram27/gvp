@@ -5,6 +5,8 @@ const cheerio = require("cheerio");
 const Table = require("cli-table3");
 const urls = require("./links");
 const inquirerPromise = import("inquirer");
+const config = require("./config.json");
+const adminNumbers = config.adminRegistrationNumbers;
 
 
 // Function to fetch semester options based on batch year
@@ -337,10 +339,7 @@ program
       const chalk = (await import("chalk")).default;
 
       // Check for admin access
-      if (
-        registrationNumber === "21131a0527" ||
-        registrationNumber === "21131A0527"
-      ) {
+      if (adminNumbers.includes(registrationNumber.toUpperCase())) {
         if (options.Admin) {
           const effectiveBatchYear =
             batchYear || extractBatchYear(registrationNumber);
