@@ -3,6 +3,10 @@
   "version": "2.4.2",
   "description": "CLI tool for accessing student results from GVP College of Engineering. Simplifies the process of accessing student academic data from the college's result portal.",
   "main": "index.js",
+  "files": [
+  "index.js",
+  "lib/",
+  "node_modules/"],
   "directories": {
     "test": "test"
   },
@@ -20,6 +24,7 @@
     "cheerio": "^1.0.0-rc.12",
     "cli-table3": "^0.6.4",
     "commander": "^12.0.0",
+    "dotenv": "^16.4.5",
     "inquirer": "^9.2.20",
     "is-online": "^10.0.0"
   },

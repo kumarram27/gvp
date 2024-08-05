@@ -5,8 +5,19 @@ const cheerio = require("cheerio");
 const Table = require("cli-table3");
 const urls = require("./links");
 const inquirerPromise = import("inquirer");
-const config = require("./config.json");
-const adminNumbers = config.adminRegistrationNumbers;
+require("dotenv").config();
+
+
+// let adminNumbers = [];
+// try {
+//   const config = require("./config.json");
+//   adminNumbers = config.adminRegistrationNumbers || [];
+// } catch (error) {
+//   console.warn("Configuration file not found. Using default settings.");
+// }
+const adminNumbers = process.env.ADMIN_REGISTRATION_NUMBERS
+  ? process.env.ADMIN_REGISTRATION_NUMBERS.split(",")
+  : [];
 
 
 // Function to fetch semester options based on batch year
