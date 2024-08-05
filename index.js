@@ -13,7 +13,7 @@ async function fetchSemesterOptions(batchYear) {
   const semesterOptions = {
     2020: ["Sem 1","Sem 2","Sem 3","Sem 4","Sem 5","Sem 6","Sem 7","Sem 8"],
     2021: ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5", "Sem 6"],
-    2022: ["Sem 1", "Sem 2", "Sem 3"],
+    2022: ["Sem 1", "Sem 2", "Sem 3", "Sem 4"],
     2023: ["Sem 1"],
     // Add more batch years and their corresponding semester options as needed
   };
@@ -155,38 +155,53 @@ async function displayResultTable(result) {
   console.log(`SGPA: ${chalk.cyan(result.sgpa)}`);
   console.log(table.toString());
 }
-async function getName(registrationNumber) {
+async function getName(registrationNumber, effectiveBatchYear) {
   const { default: isOnline } = await import("is-online");
   const online = await isOnline();
-  if(online){
-    const rollNoLength = registrationNumber.length;
-    const batchYear = extractBatchYear(registrationNumber);
-    if (!batchYear) {
-      console.error("Invalid registration number.");
-      return;
-    }
-    const url = urls[batchYear] && urls[batchYear]["Sem 1"]; // Assuming we always take the first semester's URL
-    const result = await getResults(
-      registrationNumber,
-      url,
-      "Sem 1",
-      rollNoLength,
-      batchYear
-    );
-    if (result && result.name) {
-      return result.name;
-    } else {
+
+  if (online) {
+    try {
+      const rollNoLength = registrationNumber.length;
+      const batchYear = effectiveBatchYear;
+      if (!batchYear) {
+        console.error("Invalid registration number.");
+        return;
+      }
+
+      const url = urls[batchYear] && (urls[batchYear]["Sem 3"] || urls[batchYear]["Sem 1"]); // 
+      if (!url) {
+        console.error(`No URL found for batch year ${batchYear}`);
+        return;
+      }
+
+      const result = await getResults(
+        registrationNumber,
+        url,
+        "Sem 1",
+        rollNoLength,
+        batchYear
+      );
+
+      if (result && result.name) {
+        return result.name;
+      } else {
+        console.error("No result found for the given registration number.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error in getName:", error.message);
       return null;
     }
-  }else {
-    console.log("Device is offline")
+  } else {
+    console.log("Device is offline");
     return `user ${registrationNumber}`;
   }
 }
 
-async function getResult(registrationNumber) {
+
+async function getResult(registrationNumber ,effectiveBatchYear) {
   const rollNoLength = registrationNumber.length;
-  const batchYear = extractBatchYear(registrationNumber);
+  const batchYear = effectiveBatchYear;
   const semester = await selectSemester(batchYear);
   const url = urls[batchYear] && urls[batchYear][semester];
   const result = await getResults(
@@ -301,49 +316,61 @@ program
     `);
   });
 
-// CLI command for directly fetching results based on registration number
 program
   .argument("<registration_number>")
+  .argument("[batch_year]", "Optional batch year for special cases")
   .option("-admin", "Access results with admin privileges")
   .description("Fetch results directly based on registration number")
-  .action(async (registrationNumber, options) => {
+  .action(async (registrationNumber, batchYear, options) => {
     try {
+      // Validate registration number length
       if (
         registrationNumber.length !== 10 &&
-        registrationNumber.length !== 12 &&
-        registrationNumber.length >= 5
+        registrationNumber.length !== 12
       ) {
         console.error(
           "Invalid registration number. Please enter a valid registration number."
         );
         return;
       }
-      if (registrationNumber.length === 4) {
-        console.log("Fetching results for the batch:", registrationNumber);
-        await getResult(registrationNumber);
-        return;
-      }
+
       const chalk = (await import("chalk")).default;
+
+      // Check for admin access
       if (
         registrationNumber === "21131a0527" ||
         registrationNumber === "21131A0527"
       ) {
         if (options.Admin) {
-          admin = await getName(registrationNumber);
+          const effectiveBatchYear =
+            batchYear || extractBatchYear(registrationNumber);
+          admin = await getName(registrationNumber, effectiveBatchYear);
           console.log(`Hi, ${chalk.red("Admin")} ${chalk.green(admin)}!`);
-          await getResult(registrationNumber);
+          await getResult(registrationNumber, effectiveBatchYear);
           return;
         } else {
           console.log(chalk.red("Access denied. Admin privileges required."));
           return;
         }
       }
-      user = await getName(registrationNumber);
+
+      // Determine the effective batch year
+      const effectiveBatchYear =
+        batchYear || extractBatchYear(registrationNumber);
+
+      // Fetch user info
+      user = await getName(registrationNumber, effectiveBatchYear);
+      if (!user) {
+        console.error("Could not fetch user information.");
+        return;
+      }
+
       console.log(`Hi, ${chalk.green(user)}!`);
-      await getResult(registrationNumber);
+
+      // Fetch and display results
+      await getResult(registrationNumber, effectiveBatchYear);
     } catch (error) {
-      // console.error("Error:", error.message, error.response?.data);
-      console.log("Error:", error.message);
+      console.error("Error:", error.message);
     }
   });
 
