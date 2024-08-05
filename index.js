@@ -177,7 +177,8 @@ async function getName(registrationNumber, effectiveBatchYear) {
       const rollNoLength = registrationNumber.length;
       const batchYear = effectiveBatchYear;
       if (!batchYear) {
-        console.error("Invalid registration number.");
+        console.error("Invalid registration number. ");
+        console.log("try mygvp <your_registration_no> <Batch_year> command")
         return;
       }
 
@@ -319,11 +320,8 @@ program
       command : mygvp <registration_number> 
       - To fetch your results, simply replace <registration_number> with your registration number.
 
-      command : mygvp <batch_year>
-      - You can also enter your batch year 
-      (if you want to get result URLs even if you are online or if you are a lateral entry student)
-      
-      - For specific features, follow the prompts.
+      command : mygvp <registration_number> <batch_year>
+      - Replace <batch_year> with your batch_year.This works for lateral entries and other special cases.
 
       Enjoy using mygvp! 🎉
     `);
