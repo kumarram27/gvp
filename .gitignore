@@ -1,6 +1,5 @@
 node_modules
 test
 .env
-.gitignore
 .npmignore
 config.json
