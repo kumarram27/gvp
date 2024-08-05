@@ -5,12 +5,10 @@
   "main": "index.js",
   "files": [
     "index.js",
+    "links.js",
     "lib/",
     "node_modules/"
   ],
-  "directories": {
-    "test": "test"
-  },
   "type": "commonjs",
   "bin": {
     "mygvp": "index.js"
