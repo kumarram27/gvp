@@ -15,11 +15,9 @@ require("dotenv").config();
 // } catch (error) {
 //   console.warn("Configuration file not found. Using default settings.");
 // }
-const adminNumbers = process.env.ADMIN_REGISTRATION_NUMBERS
-  ? process.env.ADMIN_REGISTRATION_NUMBERS.split(",")
-  : [];
+const adminNumber = process.env.ADMIN_REGISTRATION_NUMBER;
 
-
+const serverUrl = process.env.SERVER_URL;
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
   const inquirer = await inquirerPromise;
@@ -323,6 +321,9 @@ program
       command : mygvp <registration_number> <batch_year>
       - Replace <batch_year> with your batch_year.This works for lateral entries and other special cases.
 
+      command : mygvp <registration_number> -all
+      - To display all the GPAs of the given registration number.
+
       Enjoy using mygvp! 🎉
     `);
   });
@@ -331,6 +332,7 @@ program
   .argument("<registration_number>")
   .argument("[batch_year]", "Optional batch year for special cases")
   .option("-admin", "Access results with admin privileges")
+  .option("-all", "Display All GPAs")
   .description("Fetch results directly based on registration number")
   .action(async (registrationNumber, batchYear, options) => {
     try {
@@ -346,9 +348,39 @@ program
       }
 
       const chalk = (await import("chalk")).default;
+      if (options.All) {
+        try {
+          if (registrationNumber.toUpperCase() != adminNumber) {
+            const response = await axios.get(
+              `${
+                process.env.SERVER_URL
+              }/api/get-gpa/${registrationNumber.toUpperCase()}`
+            );
+            const data = response.data;
+            if (data) {
+              console.log(data.gpas);
+            }
+          } else {
+            if (options.Admin) {
+              const response = await axios.get(
+                `${
+                  process.env.SERVER_URL
+                }/api/get-gpa/${adminNumber}`
+              );
+              const data = response.data;
+              if (data) {
+                console.log(data.gpas);
+              }
+            }
+          }
+          return;
+        } catch (error) {
+          console.error("Error retrieving GPA data from mygvp database.");
+        }
+      }
 
       // Check for admin access
-      if (adminNumbers.includes(registrationNumber.toUpperCase())) {
+      if (adminNumber.includes(registrationNumber.toUpperCase())) {
         if (options.Admin) {
           const effectiveBatchYear =
             batchYear || extractBatchYear(registrationNumber);

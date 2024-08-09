@@ -41,6 +41,15 @@ mygvp <registration_number> <batch_year>
 ```
 Replace `<batch_year>` with your batch_year.
 This works for lateral entries and other special cases.
+
+For displaying all semester gpas of the user
+```bash
+mygvp <registration_number> -all
+
+```
+This will fetch the result data from the mygvp database.
+
+
 ## Contributing
 
 Contributions are welcome! Feel free to submit bug reports, feature requests, or pull requests.
