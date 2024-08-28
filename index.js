@@ -16,7 +16,7 @@ require("dotenv").config();
 //   console.warn("Configuration file not found. Using default settings.");
 // }
 const adminNumber = process.env.ADMIN_REGISTRATION_NUMBER || "21131A0527";
-
+const server = process.env.SERVER_URL || "https://mygvp-db.onrender.com";
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
   const inquirer = await inquirerPromise;
@@ -352,7 +352,7 @@ program
           if (registrationNumber.toUpperCase() != adminNumber) {
             const response = await axios.get(
               `${
-                process.env.SERVER_URL || "https://mygvp-db.onrender.com"
+                process.env.SERVER_URL || server || "https://mygvp-db.onrender.com"
               }/api/get-gpa/${registrationNumber.toUpperCase()}`
             );
             const data = response.data;
@@ -364,7 +364,7 @@ program
             if (options.Admin) {
               const response = await axios.get(
                 `${
-                  process.env.SERVER_URL || "https://mygvp-db.onrender.com"
+                  process.env.SERVER_URL || server || "https://mygvp-db.onrender.com"
                 }/api/get-gpa/${adminNumber}`
               );
               const data = response.data;
