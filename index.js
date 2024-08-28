@@ -17,7 +17,6 @@ require("dotenv").config();
 // }
 const adminNumber = process.env.ADMIN_REGISTRATION_NUMBER || "21131A0527";
 
-const serverUrl = process.env.SERVER_URL || "https://mygvp-db.onrender.com";
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
   const inquirer = await inquirerPromise;
@@ -353,7 +352,7 @@ program
           if (registrationNumber.toUpperCase() != adminNumber) {
             const response = await axios.get(
               `${
-                process.env.SERVER_URL
+                process.env.SERVER_URL || "https://mygvp-db.onrender.com"
               }/api/get-gpa/${registrationNumber.toUpperCase()}`
             );
             const data = response.data;
