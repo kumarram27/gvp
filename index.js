@@ -224,7 +224,15 @@ async function getResult(registrationNumber ,effectiveBatchYear) {
   );
 
   if (result) {
+    
     displayResultTable(result);
+    let res = { [semester]: result.sgpa };
+
+    await axios.post(`${server}/api/save-gpa`, {
+      registrationNumber: registrationNumber.toUpperCase(),
+      name: result.name,
+      gpas: res,
+    });
   } else {
     return null;
   }
@@ -376,7 +384,9 @@ program
           }
           return;
         } catch (error) {
-          console.error("Error retrieving GPA data from mygvp database.", error);
+          console.error("Error retrieving GPA data from mygvp database."
+            // , error
+          );
         }
       }
 
