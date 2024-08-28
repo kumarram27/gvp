@@ -25,7 +25,7 @@ async function fetchSemesterOptions(batchYear) {
     2020: ["Sem 1","Sem 2","Sem 3","Sem 4","Sem 5","Sem 6","Sem 7","Sem 8"],
     2021: ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5", "Sem 6"],
     2022: ["Sem 1", "Sem 2", "Sem 3", "Sem 4"],
-    2023: ["Sem 1"],
+    2023: ["Sem 1","Sem 2"],
     // Add more batch years and their corresponding semester options as needed
   };
   return semesterOptions[batchYear] || [];
@@ -358,6 +358,7 @@ program
             );
             const data = response.data;
             if (data) {
+              console.log(`Hi ${chalk.green(data.name)}!`);
               console.log(data.gpas);
             }
           } else {
@@ -369,6 +370,7 @@ program
               );
               const data = response.data;
               if (data) {
+                console.log(`Hi ${chalk.red(data.name)}!`);
                 console.log(data.gpas);
               }
             }
