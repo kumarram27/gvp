@@ -377,7 +377,7 @@ program
           }
           return;
         } catch (error) {
-          console.error("Error retrieving GPA data from mygvp database.");
+          console.error("Error retrieving GPA data from mygvp database.", error);
         }
       }
 
