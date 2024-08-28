@@ -382,7 +382,7 @@ program
       }
 
       // Check for admin access
-      if (adminNumber.includes(registrationNumber.toUpperCase())) {
+      if (registrationNumber.toUpperCase() == adminNumber) {
         if (options.Admin) {
           const effectiveBatchYear =
             batchYear || extractBatchYear(registrationNumber);
