@@ -364,7 +364,7 @@ program
             if (options.Admin) {
               const response = await axios.get(
                 `${
-                  process.env.SERVER_URL
+                  process.env.SERVER_URL || "https://mygvp-db.onrender.com"
                 }/api/get-gpa/${adminNumber}`
               );
               const data = response.data;
