@@ -15,9 +15,9 @@ require("dotenv").config();
 // } catch (error) {
 //   console.warn("Configuration file not found. Using default settings.");
 // }
-const adminNumber = process.env.ADMIN_REGISTRATION_NUMBER;
+const adminNumber = process.env.ADMIN_REGISTRATION_NUMBER || "21131A0527";
 
-const serverUrl = process.env.SERVER_URL;
+const serverUrl = process.env.SERVER_URL || "https://mygvp-db.onrender.com";
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
   const inquirer = await inquirerPromise;
