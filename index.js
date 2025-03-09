@@ -63,8 +63,8 @@ async function fetchResultData(url, payload) {
     const response = await axios.post(url, payload);
     return response.data;
   } catch (error) {
-    console.error("Error fetching result data:", error);
-    throw new Error("Error fetching result data:", error.message);
+    console.error("Error fetching result data",);
+    throw new Error("Error fetching result data",error);
   }
 }
 

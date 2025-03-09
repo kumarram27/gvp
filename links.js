@@ -39,7 +39,7 @@ const urls = {
   },
   2024: {
     "Sem 1":
-      "http://gvpce.ac.in:10000/GVP%20Results/Results.jsp?fileName=B.%20Tech.%20I%20Semester%20(R-2022)%20(For%202024%20Admitted%20Batches)%20Regular%20Examination%20Results,%20January%2025&regulation=R-2022&semester=1&type=regular&revaluationDate=06-03-2025",
+      "http://gvpce.ac.in:10000/GVP%20Results/Results.jsp?fileName=B.%20Tech.%20I%20Semester%20(R-2022)%20(For%202024%20Admitted%20Batches)%20Regular%20Examination%20Results,%20January%202025&regulation=R-2022&semester=1&type=regular&revaluationDate=06-03-2025",
   },
 };
 
