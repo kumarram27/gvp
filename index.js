@@ -21,10 +21,11 @@ const server = process.env.SERVER_URL || "https://mygvp-db.onrender.com";
 async function fetchSemesterOptions(batchYear) {
   const inquirer = await inquirerPromise;
   const semesterOptions = {
-    2020: ["Sem 1","Sem 2","Sem 3","Sem 4","Sem 5","Sem 6","Sem 7","Sem 8"],
-    2021: ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5", "Sem 6"],
-    2022: ["Sem 1", "Sem 2", "Sem 3", "Sem 4"],
-    2023: ["Sem 1","Sem 2"],
+    2021: ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5", "Sem 6", "Sem 7"],
+    2022: ["Sem 1", "Sem 2", "Sem 3", "Sem 4", "Sem 5"],
+    2023: ["Sem 1","Sem 2", "Sem 3"],
+    2024: ["Sem 1"],
+
     // Add more batch years and their corresponding semester options as needed
   };
   return semesterOptions[batchYear] || [];
@@ -48,30 +49,12 @@ async function selectSemester(batchYear) {
 
 // Function to extract batch year from registration number
 function extractBatchYear(registrationNumber) {
-  let batchYear = "";
-  // Extracting batch year using regular expressions
-  if (
-    (/^20/.test(registrationNumber) && registrationNumber.length === 10) ||
-    registrationNumber == 2020
-  ) {
-    batchYear = "2020";
-  } else if (
-    (/^21/.test(registrationNumber) && registrationNumber.length === 10) ||
-    registrationNumber == 2021
-  ) {
-    batchYear = "2021";
-  } else if (
-    (/^322/.test(registrationNumber) && registrationNumber.length === 12) ||
-    registrationNumber == 2022
-  ) {
-    batchYear = "2022";
-  } else if (
-    (/^323/.test(registrationNumber) && registrationNumber.length === 12) ||
-    registrationNumber == 2023
-  ) {
-    batchYear = "2023";
-  }
-  return batchYear;
+  if (registrationNumber.includes("A")) return "2021";
+
+  const match = registrationNumber.match(/^.(\d{2})/);
+  if (match) return `20${match[1]}`;
+
+  return "2021";
 }
 
 // Function to fetch result data using POST method with payload
@@ -262,9 +245,11 @@ async function getResults(
     }
 
     const parsedUrl = new URL(url);
-    const semname = parsedUrl.searchParams.get("semname");
+    const fileName = parsedUrl.searchParams.get("fileName");
     const regulation = parsedUrl.searchParams.get("regulation");
-    const semesterNo = parsedUrl.searchParams.get("semester");
+    const semester = parsedUrl.searchParams.get("semester");
+    const revaluationDate = parsedUrl.searchParams.get("revaluationDate");
+    const type = parsedUrl.searchParams.get("type");
 
     const constructEndpoint = (url) => {
       return url.replace("btechsearch.asp", "find_info.asp");
@@ -290,12 +275,14 @@ async function getResults(
     //     u_field: "state",
     //   };
     } else {
-      endpoint = "http://gvpce.ac.in:10000/GVP%20Results/RegularResults";
+      endpoint = "http://gvpce.ac.in:10000/GVP%20Results/gvpResults";
       payload = {
-        input1: registrationNumber,
-        hidedata: semname,
-        hidedata2: regulation,
-        hidedata3: semesterNo,
+        number: registrationNumber,
+        fileName: fileName,
+        regulation: regulation,
+        semester: semester,
+        revaluationDate: revaluationDate,
+        type: type,
       };
     }
 
