@@ -15,7 +15,7 @@ require("dotenv").config();
 // } catch (error) {
 //   console.warn("Configuration file not found. Using default settings.");
 // }
-const adminNumber = process.env.ADMIN_REGISTRATION_NUMBER || "21131A0527";
+const adminNumber = process.env.ADMIN_REGISTRATION_NUMBER;
 const server = process.env.SERVER_URL || "https://mygvp-db.onrender.com";
 // Function to fetch semester options based on batch year
 async function fetchSemesterOptions(batchYear) {
@@ -26,7 +26,6 @@ async function fetchSemesterOptions(batchYear) {
     2023: ["Sem 1","Sem 2", "Sem 3"],
     2024: ["Sem 1"],
 
-    // Add more batch years and their corresponding semester options as needed
   };
   return semesterOptions[batchYear] || [];
 }
@@ -49,7 +48,8 @@ async function selectSemester(batchYear) {
 
 // Function to extract batch year from registration number
 function extractBatchYear(registrationNumber) {
-  if (registrationNumber.includes("A")) return "2021";
+  let registration_number = registrationNumber.toUpperCase();
+  if (registration_number.includes("A")) return "2021";
 
   const match = registrationNumber.match(/^.(\d{2})/);
   if (match) return `20${match[1]}`;
@@ -397,7 +397,7 @@ program
         batchYear || extractBatchYear(registrationNumber);
 
       // Fetch user info
-      user = await getName(registrationNumber, effectiveBatchYear);
+      user = await getName(registrationNumber.toUpperCase(), effectiveBatchYear);
       if (!user) {
         console.error("Could not fetch user information.");
         return;
@@ -406,7 +406,7 @@ program
       console.log(`Hi, ${chalk.green(user)}!`);
 
       // Fetch and display results
-      await getResult(registrationNumber, effectiveBatchYear);
+      await getResult(registrationNumber.toUpperCase(), effectiveBatchYear);
     } catch (error) {
       console.error("Error:", error.message);
     }
