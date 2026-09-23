@@ -34,6 +34,17 @@ mygvp <registration_number>
 ```
 Replace `<registration_number>` with your registration_number.
 
+## Try It
+
+If you want to simply try it:
+
+```bash
+mygvp 21131A0527
+```
+
+For example, `21131A0527` was my registration number while I was a student at GVPCE.
+
+
 Or you can enter your batch year also:
 ```bash
 mygvp <registration_number> <batch_year>
